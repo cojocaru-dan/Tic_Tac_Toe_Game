@@ -67,6 +67,10 @@ function processAICoordinate() {
 // this function is called when the user clicks on 
 // the button labeled `Restart Game`
 function resetGame() {
+    setHTMLvisibilityForInputGameMode(true);
+    setHTMLvisibilityForInputHumanCoordinates(false);
+    setHTMLvisibilityForInputAiCoordinatesInput(false);
+    setHTMLvisibilityForButtonLabeledReset(false);
     console.log(`resetGame()`);
 }
 
@@ -76,7 +80,37 @@ function extractCoordinates(input) {
     // this is a sample of what should be returned if the
     // the user had typed `A1`
     // you need to add the to also treat other cases (A2..C3)
-    return { x: 0, y: 0};
+    switch (input) {
+        case "A1":
+            return { x: 0, y: 0};
+            break;
+        case "A2":
+                return { x: 0, y: 1};
+                break;            
+        case "A3":
+                return { x: 0, y: 2};
+                break;            
+        case "B1":
+                return { x: 1, y: 0};
+                break;            
+        case "B2":
+                return { x: 1, y: 1};
+                break;
+        case "B3":
+                return { x: 1, y: 2};
+                break;            
+        case "C1":
+                return { x: 2, y: 0};
+                break;            
+        case "C2":
+                return { x: 2, y: 1};
+                break;            
+        case "C3":
+                return { x: 2, y: 2};
+                break;    
+        default:
+            break;
+    }
 }
 
 // this function should return `X` or `O` or undefined (carefull it's not a string )
