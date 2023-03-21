@@ -68,6 +68,27 @@ function processHumanCoordinate(input) {
 // the button labeled `Generate AI coordinates`
 function processAICoordinate() {
     console.log(`processAICoordinate()`);
+    const emptyCells = [];
+    for (let row = 0; row < 3; row++) {
+        for (let column = 0; column < 3; column++) {
+            if (board[row][column] === "") {
+                emptyCells.push([row, column]);
+            }
+        }
+    }
+
+    aiPosition = Math.floor(Math.random() * emptyCells.length);
+    const [emptyRow, emptyCol] = emptyCells[aiPosition];
+    board[emptyRow][emptyCol] = "0";
+    currentPlayer = "X";
+    gameTurn += 1;
+
+    if (isPlayerXHuman && !isPlayerYHuman) {
+        setHTMLvisibilityForInputHumanCoordinates(true);
+        setHTMLvisibilityForInputAiCoordinatesInput(false);   
+    }
+    displayBoard(board);
+    // extractCoordinates()
 }
 
 // this function is called when the user clicks on 
