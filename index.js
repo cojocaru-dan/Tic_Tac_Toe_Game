@@ -67,6 +67,8 @@ function processAICoordinate() {
 // this function is called when the user clicks on 
 // the button labeled `Restart Game`
 function resetGame() {
+    resetBoard();
+    displayBoard(board);
     setHTMLvisibilityForInputGameMode(true);
     setHTMLvisibilityForInputHumanCoordinates(false);
     setHTMLvisibilityForInputAiCoordinatesInput(false);
