@@ -30,9 +30,11 @@ function setGameMode(selectedValue) {
 function processHumanCoordinate(input) {
     console.log(`'processHumanCoordinate('${input}')`);
     if (gameTurn % 2 === 0) {
-        currentPlayer = 'diamond';
+        currentPlayer = 'X';
+        displayMessage("Player 0's turn");
     } else {
-        currentPlayer = 'pets';
+        currentPlayer = '0';
+        displayMessage("Player X's turn");
     }
 
     let coordinates = extractCoordinates(input);
@@ -56,6 +58,10 @@ function processHumanCoordinate(input) {
     // TODO: add conditions to hide the coordinates screen for 
     // the human player & show for the button to generate AI 
     // coordinates
+    if (isPlayerYHuman === false && gameTurn % 2 === 1) {
+        setHTMLvisibilityForInputHumanCoordinates(false);
+        setHTMLvisibilityForInputAiCoordinatesInput(true);
+    }
 }
 
 // this function is called whenever the user presses
@@ -74,8 +80,11 @@ function resetGame() {
     setHTMLvisibilityForInputAiCoordinatesInput(false);
     setHTMLvisibilityForButtonLabeledReset(false);
     console.log(`resetGame()`);
+    document.querySelector('.mode > select').value = "";
+    document.querySelector('.coordinates > input').value = "";
+    displayMessage("");
+    gameTurn = 0;
 }
-
 // this function should change from A1..C3 to coordinates
 // that are present in the `board` global variable
 function extractCoordinates(input) {
