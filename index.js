@@ -40,40 +40,42 @@ function processHumanCoordinate(input) {
 
     // Check if cell is empty and display warning message 
     let coordinates = extractCoordinates(input);
-    if (board[coordinates.x][coordinates.y] !== ""){
-        displayMessage("Position is already taken on board")
-        gameTurn += 1;
-    } else {
-        board[coordinates.x][coordinates.y] = currentPlayer;
-    }; 
-
-    const winningPlayer = getWinningPlayer(board);
-    if (winningPlayer) {
-        displayMessage(`Player ${currentPlayer} has won !`);
+    if (coordinates) {
+        if (board[coordinates.x][coordinates.y] !== ""){
+            displayMessage("Position is already taken on board")
+            gameTurn += 1;
+        } else {
+            board[coordinates.x][coordinates.y] = currentPlayer;
+        }; 
+        displayBoard(board);
+    
+        const winningPlayer = getWinningPlayer(board);
+        if (winningPlayer) {
+            displayMessage(`Player ${currentPlayer} has won !`);
+            return;
+        } else if (winningPlayer !== false){
+            gameTurn += 1;
+            document.querySelector('.coordinates > input').value = "";
+    
+            // TODO: add a message stating either
+            // Player X's turn
+            // Player O's turn
+            // It's a tie
+            // Player X won 
+            // Player O won 
+    
+            // TODO: add conditions to hide the coordinates screen for 
+            // the human player & show for the button to generate AI 
+            // coordinates
+            if (isPlayerYHuman === false && gameTurn % 2 === 1) {
+                setHTMLvisibilityForInputHumanCoordinates(false);
+                setHTMLvisibilityForInputAiCoordinatesInput(true);
+            }
+        }
+        console.log(board);
     }
-
-    gameTurn += 1;
-    displayBoard(board);
-    document.querySelector('.coordinates > input').value = "";
-
-    // TODO: add a message stating either
-    // Player X's turn
-    // Player O's turn
-    // It's a tie
-    // Player X won 
-    // Player O won 
-
-    // TODO: add conditions to hide the coordinates screen for 
-    // the human player & show for the button to generate AI 
-    // coordinates
-    if (isPlayerYHuman === false && gameTurn % 2 === 1) {
-        setHTMLvisibilityForInputHumanCoordinates(false);
-        setHTMLvisibilityForInputAiCoordinatesInput(true);
-    }
-    console.log(board);
+    
 }
-// Display each player's turn
-let displayPlayerMessage = function() {currentPlayer == "X" ? displayMessage("Player 0's turn") : displayMessage("Player X's turn")};
 
 // this function is called whenever the user presses
 // the button labeled `Generate AI coordinates`
@@ -88,20 +90,105 @@ function processAICoordinate() {
             }
         }
     }
-
-    aiPosition = Math.floor(Math.random() * emptyCells.length);
-    const [emptyRow, emptyCol] = emptyCells[aiPosition];
-    board[emptyRow][emptyCol] = "0";
-    currentPlayer = "X";
-    displayPlayerMessage();
-    gameTurn += 1;
-    // Check if the next player is human (first player is human, second is AI)
-    if (isPlayerXHuman && !isPlayerYHuman) {
-        setHTMLvisibilityForInputHumanCoordinates(true);
-        setHTMLvisibilityForInputAiCoordinatesInput(false);   
+    const easyWinPositionAI = getUnbeatableAiCoordinates("0");
+    const easyWinPreventAI = getUnbeatableAiCoordinates("X");
+    if (easyWinPositionAI) {
+        board[easyWinPositionAI[0]][easyWinPositionAI[1]] = "0";
+    } else if (easyWinPreventAI){
+        board[easyWinPreventAI[0]][easyWinPreventAI[1]] = "0";
+    } else {
+        aiPosition = Math.floor(Math.random() * emptyCells.length);
+        const [emptyRow, emptyCol] = emptyCells[aiPosition];
+        currentPlayer = "0";
+        board[emptyRow][emptyCol] = currentPlayer;
     }
+    console.log("easyWinPosition", easyWinPositionAI);
+    console.log("easyWinPrevent", easyWinPreventAI);
+
     displayBoard(board);
-    // extractCoordinates()
+    // Check win and reset the game
+    const winningPlayer = getWinningPlayer(board);
+    if (winningPlayer) {
+        displayMessage(`Player ${currentPlayer} has won !`);
+        setHTMLvisibilityForInputHumanCoordinates(false); 
+    } else {
+        currentPlayer = "X";
+        gameTurn += 1;
+        displayMessage("Player X's turn");
+        // Check if the next player is human (first player is human, second is AI)
+        if (isPlayerXHuman && !isPlayerYHuman) {
+            setHTMLvisibilityForInputHumanCoordinates(true);
+            setHTMLvisibilityForInputAiCoordinatesInput(false); 
+        }
+    }
+}
+
+function getUnbeatableAiCoordinates(player) {
+    // Ai goes for easy win
+
+    // Check rows
+    for (let i = 0; i < 3; i++) {
+        if (board[i].filter(cell => cell === player).length === 2 && board[i].includes("")) {
+            return [i, board[i].indexOf("")];
+        }
+    }
+
+    // // Check columns
+    for (let i = 0; i < 3; i++) {
+        let count0 = 0;
+        let emptyCell = 0;
+        let winningRow = -1;
+        let winningCol = -1;
+        for (let j = 0; j < 3; j++) {
+            if (board[j][i] === player){
+                count0 += 1;
+            } else if (board[j][i] === ""){
+                emptyCell += 1;
+                winningRow = j;
+                winningCol = i;
+            }
+        };
+
+        if (count0 === 2 && emptyCell === 1) {
+            return [winningRow, winningCol];
+        }
+    }
+    
+    // Check diagonals
+    // Check diagonal left to right 
+    let count0 = 0;
+    let emptyCell = 0;
+    let winningRow = -1;
+    let winningCol = -1;
+    for (let i = 0; i < 3; i++) {
+        if (board[i][i] === player){
+            count0 += 1;
+        } else if (board[i][i] === ""){
+            emptyCell += 1;
+            winningRow = i;
+            winningCol = i;
+        }
+    }
+    if (count0 === 2 && emptyCell === 1) {
+        return [winningRow, winningCol];
+    }
+    // Check diagonal right to left
+    count0 = 0;
+    emptyCell = 0;
+    winningRow = -1;
+    winningCol = -1;
+    for (let i = 0; i < 3; i++) {
+        if (board[i][2 - i] === player){
+            count0 += 1;
+        } else if (board[i][2 - i] === ""){
+            emptyCell += 1;
+            winningRow = i;
+            winningCol = 2 - i;
+        }
+    }
+    if (count0 === 2 && emptyCell === 1) {
+        return [winningRow, winningCol];
+    }
 }
 
 // this function is called when the user clicks on 
@@ -158,11 +245,13 @@ function getWinningPlayer(board) {
         if (arrayOfBoard.every(item => item === "X")){
             displayMessage("Player X wins!");
             setHTMLvisibilityForInputHumanCoordinates(false);
+            setHTMLvisibilityForInputAiCoordinatesInput(false);
             setHTMLvisibilityForButtonLabeledReset(true);
             win = true;
         } else if (arrayOfBoard.every(item => item === "0")){
             displayMessage("Player 0 wins!");
             setHTMLvisibilityForInputHumanCoordinates(false);
+            setHTMLvisibilityForInputAiCoordinatesInput(false);
             setHTMLvisibilityForButtonLabeledReset(true);
             win = true;
         };
@@ -180,16 +269,18 @@ function getWinningPlayer(board) {
         if (countXand0 === 3){
             displayMessage("Player X wins!");
             setHTMLvisibilityForInputHumanCoordinates(false);
+            setHTMLvisibilityForInputAiCoordinatesInput(false);
             setHTMLvisibilityForButtonLabeledReset(true);
             win = true;
 
         } else if (countXand0 === -3){
             displayMessage("Player 0 wins!");
             setHTMLvisibilityForInputHumanCoordinates(false);
+            setHTMLvisibilityForInputAiCoordinatesInput(false);
             setHTMLvisibilityForButtonLabeledReset(true);
             win = true;
         }
-    };
+    }
 
     // Check win on diagonals and reset the game
     let countOnDiagonals = 0;
@@ -200,17 +291,19 @@ function getWinningPlayer(board) {
         } else if (board[i][i] === "0"){
             countOnDiagonals -= 1;
         }
-    };
+    }
     // Win on first diagonal:
     if (countOnDiagonals === 3){
         displayMessage("Player X wins!");
         setHTMLvisibilityForInputHumanCoordinates(false);
+        setHTMLvisibilityForInputAiCoordinatesInput(false);
         setHTMLvisibilityForButtonLabeledReset(true);
         win = true;
 
     } else if (countOnDiagonals === -3){
         displayMessage("Player 0 wins!");
         setHTMLvisibilityForInputHumanCoordinates(false);
+        setHTMLvisibilityForInputAiCoordinatesInput(false);
         setHTMLvisibilityForButtonLabeledReset(true);
         win = true;
     }
@@ -223,17 +316,19 @@ function getWinningPlayer(board) {
         } else if (board[i][2 - i] === "0"){
             countOnDiagonals -= 1;
         }
-    };
+    }
     // Win on second diagonal:
     if (countOnDiagonals === 3){
         displayMessage("Player X wins!");
         setHTMLvisibilityForInputHumanCoordinates(false);
+        setHTMLvisibilityForInputAiCoordinatesInput(false);
         setHTMLvisibilityForButtonLabeledReset(true);
         win = true;
 
     } else if (countOnDiagonals === -3){
         displayMessage("Player 0 wins!");
         setHTMLvisibilityForInputHumanCoordinates(false);
+        setHTMLvisibilityForInputAiCoordinatesInput(false);
         setHTMLvisibilityForButtonLabeledReset(true);
         win = true;
     }
@@ -243,6 +338,10 @@ function getWinningPlayer(board) {
     if (!win && !board[0].includes("") && !board[1].includes("") && !board[2].includes("")){
         displayMessage("It's a tie!");
         setHTMLvisibilityForInputHumanCoordinates(false);
+        setHTMLvisibilityForInputAiCoordinatesInput(false);
         setHTMLvisibilityForButtonLabeledReset(true);
+        return false;
+    } else if (win) {
+        return true;
     }
 };
