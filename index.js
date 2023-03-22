@@ -14,15 +14,24 @@ function setGameMode(selectedValue) {
             isPlayerXHuman = true;
             isPlayerYHuman = false;
             break;
+        case "ai-ai":
+            isPlayerXHuman = false;
+            isPlayerYHuman = false;
     }
     resetBoard();
 
     setHTMLvisibilityForInputGameMode(false);
-    setHTMLvisibilityForInputHumanCoordinates(true);
-    setHTMLvisibilityForInputAiCoordinatesInput(false);
     setHTMLvisibilityForButtonLabeledReset(true);
+    if (selectedValue === "ai-ai") {
+        setHTMLvisibilityForInputHumanCoordinates(false);
+        setHTMLvisibilityForInputAiCoordinatesInput(true);
+    } else {
+        setHTMLvisibilityForInputHumanCoordinates(true);
+        setHTMLvisibilityForInputAiCoordinatesInput(false);
+    };
+
     displayMessage("Player X's turn");
-}
+};
 
 // this function is called whenever the user presses the `enter`
 // key in the input box labeled `enter coordinates`
@@ -81,6 +90,14 @@ function processHumanCoordinate(input) {
 // the button labeled `Generate AI coordinates`
 function processAICoordinate() {
     console.log(`processAICoordinate()`);
+    if (gameTurn % 2 === 0) {
+        currentPlayer = 'X';
+        displayMessage("Player 0's turn");
+    } else {
+        currentPlayer = '0';
+        displayMessage("Player X's turn");
+    };
+    let opponent = currentPlayer === "X" ? "0" : "X";
     //Get empty cells 
     const emptyCells = [];
     for (let row = 0; row < 3; row++) {
@@ -90,16 +107,15 @@ function processAICoordinate() {
             }
         }
     }
-    const easyWinPositionAI = getUnbeatableAiCoordinates("0");
-    const easyWinPreventAI = getUnbeatableAiCoordinates("X");
+    const easyWinPositionAI = getUnbeatableAiCoordinates(currentPlayer);
+    const easyWinPreventAI = getUnbeatableAiCoordinates(opponent);
     if (easyWinPositionAI) {
-        board[easyWinPositionAI[0]][easyWinPositionAI[1]] = "0";
+        board[easyWinPositionAI[0]][easyWinPositionAI[1]] = currentPlayer;
     } else if (easyWinPreventAI){
-        board[easyWinPreventAI[0]][easyWinPreventAI[1]] = "0";
+        board[easyWinPreventAI[0]][easyWinPreventAI[1]] = currentPlayer;
     } else {
         aiPosition = Math.floor(Math.random() * emptyCells.length);
         const [emptyRow, emptyCol] = emptyCells[aiPosition];
-        currentPlayer = "0";
         board[emptyRow][emptyCol] = currentPlayer;
     }
     console.log("easyWinPosition", easyWinPositionAI);
@@ -112,9 +128,8 @@ function processAICoordinate() {
         displayMessage(`Player ${currentPlayer} has won !`);
         setHTMLvisibilityForInputHumanCoordinates(false); 
     } else {
-        currentPlayer = "X";
         gameTurn += 1;
-        displayMessage("Player X's turn");
+        // displayMessage("Player X's turn");
         // Check if the next player is human (first player is human, second is AI)
         if (isPlayerXHuman && !isPlayerYHuman) {
             setHTMLvisibilityForInputHumanCoordinates(true);
